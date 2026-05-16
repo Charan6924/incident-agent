@@ -11,7 +11,7 @@
     "@incident-agent/shared": "workspace:*",
     "@incident-agent/integrations": "workspace:*",
     "inngest": "^3.19.0",
-    "next": "^14.2.0",
+    "next": "^16.2.6",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
   },
