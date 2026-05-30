@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@incident-agent/shared": "workspace:*",
-    "@octokit/rest": "^22.0.1"
+    "@octokit/rest": "^22.0.1",
+    "@upstash/kafka": "^1.3.5",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -15,7 +15,8 @@ export function createGitHubClient(){
             }
             
             const {data} = await octokit.repos.listCommits({
-                owner, repo, since, per_page:50
+                owner, repo, since, per_page:50,
+                path: service
             })
             return data;
 
