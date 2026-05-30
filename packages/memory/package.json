@@ -1,0 +1,18 @@
+{
+  "name": "@incident-agent/memory",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@incident-agent/shared": "workspace:*",
+    "@qdrant/js-client-rest": "^1.10.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
