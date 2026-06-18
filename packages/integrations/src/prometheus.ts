@@ -1,3 +1,8 @@
+/**
+ * Create a Prometheus API client for querying metrics during incident investigation.
+ *
+ * Requires env var: PROMETHEUS_URL.
+ */
 export function createPrometheusClient() {
   const baseUrl = process.env.PROMETHEUS_URL!;
 

@@ -1,6 +1,7 @@
 import { Annotation } from "@langchain/langgraph";
 import { Incident, IncidentStatus, InvestigationResult, RemediationResult, PostMortem } from "@incident-agent/shared"
 
+/** LangGraph state annotation defining the incident workflow state channels. */
 export const IncidentAnnotation = Annotation.Root({
     incident : Annotation<Incident>({
         reducer : (prev, next) => next ?? prev,
@@ -24,4 +25,5 @@ export const IncidentAnnotation = Annotation.Root({
 });
 
 
-export type IncidentState = typeof IncidentAnnotation.State;   
+/** Inferred state type for node function signatures. */
+export type IncidentState = typeof IncidentAnnotation.State;

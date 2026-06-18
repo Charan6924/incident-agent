@@ -2,8 +2,9 @@ import { config } from "dotenv";
 import { resolve } from "path";
 config({ path: resolve(__dirname, "../../../.env") });
 
-import { createGitHubClient } from "./github";                                                                                      
-                                                                                                                                          
+import { createGitHubClient } from "./github";
+
+/** Smoke test for the GitHub integration client. */
 async function main() {
     const client = createGitHubClient();
     try{

@@ -1,5 +1,10 @@
 import type { Incident, PostMortem } from "@incident-agent/shared";
 
+/**
+ * Create a Slack webhook client for incident notifications.
+ *
+ * Requires env var: SLACK_WEBHOOK_URL.
+ */
 export function createSlackClient(){
     const webHookUrl = process.env.SLACK_WEBHOOK_URL!;
 

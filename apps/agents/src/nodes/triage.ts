@@ -3,6 +3,8 @@ import { llm } from "../llm"
 import { Severity, IncidentStatus } from "@incident-agent/shared"
 import { IncidentState } from "../state"
 
+/** Structured output classifier for severity + title extraction. */
+/** Structured output classifier for severity + title extraction. */
 const classifier = llm.withStructuredOutput({
     type: "object",
     properties: {

@@ -1,5 +1,6 @@
 export * from "./types"
 
+/** Severity level of an incident (P0 = critical, P4 = low). */
 export enum Severity{
     P0 = "P0",
     P1 = "P1",
@@ -8,6 +9,7 @@ export enum Severity{
     P4 = "P4",
 }
 
+/** Lifecycle status of an incident as it moves through the agent workflow. */
 export enum IncidentStatus{
     detected = "detected",
     triaged = "triaged",
@@ -17,6 +19,7 @@ export enum IncidentStatus{
     closed = "closed"
 }
 
+/** Source systems that can fire incident alerts. */
 export enum EventSource{
     prometheus = "prometheus",
     datadog = "datadog",
@@ -24,10 +27,12 @@ export enum EventSource{
     custom = "custom"
 }
 
+/** Flexible metadata attached to an incident event. */
 export interface MetaData{
     // TODO
 }
 
+/** A raw alert event from a monitoring source (Prometheus, Datadog, etc.). */
 export interface IncidentEvent{
     id : number,
     source : string,
@@ -39,6 +44,7 @@ export interface IncidentEvent{
     metadata? : MetaData
 }
 
+/** Aggregated incident record that accumulates state as it progresses. */
 export interface Incident{
     id : number,
     title : string,
@@ -52,6 +58,7 @@ export interface Incident{
     resolvedAt? : string
 }
 
+/** A single entry in the incident timeline (agent action, status change, etc.). */
 export interface TimeLineEntry{
     type: string,
     timestamp : string,
@@ -60,6 +67,7 @@ export interface TimeLineEntry{
     data? : unknown
 }
 
+/** The full state object passed through the LangGraph agent workflow. */
 export interface AgentState{
     incident : Incident,
     status : IncidentStatus,
@@ -68,6 +76,7 @@ export interface AgentState{
     postMortem? : PostMortem
 }
 
+/** Result produced by the investigation agent after analyzing an incident. */
 export interface InvestigationResult{
     rootCause : string,
     evidence : string[],
@@ -75,12 +84,14 @@ export interface InvestigationResult{
     summary : string,
 }
 
+/** Result produced by the remediation agent after applying or suggesting a fix. */
 export interface RemediationResult{
     action : string,
     status : "pending" | "applied" | "failed" | "skipped",
     details? : string,
 }
 
+/** Post-mortem report compiled after an incident is resolved. */
 export interface PostMortem{
     timeline : TimeLineEntry[],
     rootCause : string,
@@ -89,12 +100,14 @@ export interface PostMortem{
     lessons : string[],
 }
 
+/** Message payload for Slack webhook notifications. */
 export interface SlackMessage{
     channel : string,
     text : string,
     blocks? : unknown[];
 }
 
+/** Message payload for Upstash Kafka event publishing. */
 export interface KafkaMessage{
     topic : string,
     key? : string,
