@@ -1,5 +1,7 @@
 # AI Incident Response Platform
 
+> **IMPORTANT**: Do not write or edit any code/files without explicit user permission. The user writes all code themselves. You may read files, explain concepts, review code, and answer questions, but never create or modify files unless told otherwise.
+
 > Multi-agent system that autonomously responds to production incidents — detects alerts, triages severity, investigates root cause, applies remediation, and generates post-mortems.
 
 ---
