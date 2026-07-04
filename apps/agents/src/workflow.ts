@@ -22,7 +22,7 @@ export const NODE = {
  * P0/P1 → human escalation + investigation.
  * P2-P4 → investigation only (autonomous).
  */
-function routeTriage(state: IncidentState): string {
+export function routeTriage(state: IncidentState): string {
   const severity = state.incident.severity;
   if (severity === Severity.P0 || severity === Severity.P1) {
     return NODE.HUMAN_ESCALATION;
