@@ -3,6 +3,7 @@
 import { StateGraph, START, END } from "@langchain/langgraph";
 import { IncidentAnnotation, IncidentState } from "./state";
 import { triageNode } from "./nodes/triage";
+import { humanEscalationNode } from "./nodes/human_escalation";
 import { Severity } from "@incident-agent/shared";
 
 export const NODE = {
@@ -28,6 +29,7 @@ function routeTriage(state: IncidentState): string {
 
 const workflow = new StateGraph(IncidentAnnotation)
   .addNode(NODE.TRIAGE, triageNode)
+  .addNode(NODE.HUMAN_ESCALATION, humanEscalationNode)
   .addEdge(START, NODE.TRIAGE)
   .addConditionalEdges(NODE.TRIAGE, routeTriage, {
     [NODE.HUMAN_ESCALATION]: NODE.HUMAN_ESCALATION,
