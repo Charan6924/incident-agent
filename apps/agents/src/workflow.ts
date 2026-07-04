@@ -48,3 +48,12 @@ const workflow = new StateGraph(IncidentAnnotation)
 
 /** Compiled LangGraph workflow ready for invocation. */
 export const graph = workflow.compile();
+
+/**
+ * Convenience wrapper: invokes the full incident workflow from start to finish.
+ * Accepts a raw incident, seeds the initial state, and returns the final state
+ * after the workflow reaches END.
+ */
+export async function runWorkflow(state: IncidentState): Promise<IncidentState> {
+  return await graph.invoke(state);
+}
