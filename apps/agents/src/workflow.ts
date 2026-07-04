@@ -6,6 +6,7 @@ import { triageNode } from "./nodes/triage";
 import { humanEscalationNode } from "./nodes/human_escalation";
 import { investigateNode } from "./nodes/investigate";
 import { remediateNode } from "./nodes/remediate";
+import { postmortemNode } from "./nodes/postmortem";
 import { Severity } from "@incident-agent/shared";
 
 export const NODE = {
@@ -34,10 +35,16 @@ const workflow = new StateGraph(IncidentAnnotation)
   .addNode(NODE.HUMAN_ESCALATION, humanEscalationNode)
   .addNode(NODE.INVESTIGATE, investigateNode)
   .addNode(NODE.REMEDIATE, remediateNode)
+  .addNode(NODE.POSTMORTEM, postmortemNode)
   .addEdge(START, NODE.TRIAGE)
   .addConditionalEdges(NODE.TRIAGE, routeTriage, {
     [NODE.HUMAN_ESCALATION]: NODE.HUMAN_ESCALATION,
     [NODE.INVESTIGATE]: NODE.INVESTIGATE,
   })
   .addEdge(NODE.HUMAN_ESCALATION, NODE.INVESTIGATE)
-  .addEdge(NODE.INVESTIGATE, NODE.REMEDIATE);
+  .addEdge(NODE.INVESTIGATE, NODE.REMEDIATE)
+  .addEdge(NODE.REMEDIATE, NODE.POSTMORTEM)
+  .addEdge(NODE.POSTMORTEM, END);
+
+/** Compiled LangGraph workflow ready for invocation. */
+export const graph = workflow.compile();
