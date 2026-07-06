@@ -46,7 +46,7 @@ const workflow = new StateGraph(IncidentAnnotation)
   .addEdge(NODE.REMEDIATE, NODE.POSTMORTEM)
   .addEdge(NODE.POSTMORTEM, END);
 
-/** Compiled LangGraph workflow ready for invocation. */
+
 export const graph = workflow.compile();
 
 /**

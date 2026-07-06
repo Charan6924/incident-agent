@@ -1,4 +1,4 @@
-import { Client as UpstashKafka } from "@upstash/kafka";
+import { Kafka as UpstashKafka } from "@upstash/kafka";
 import type { IncidentEvent } from "@incident-agent/shared";
 
 /**
