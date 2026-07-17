@@ -13,7 +13,7 @@
     "@incident-agent/memory": "workspace:*",
     "@incident-agent/shared": "workspace:*",
     "@langchain/core": "^1.2.2",
-    "@langchain/langgraph": "^1.4.7",
+    "@langchain/langgraph": "^1.4.8",
     "@langchain/openai": "^1.5.5"
   },
   "devDependencies": {
