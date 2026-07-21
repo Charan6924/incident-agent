@@ -75,7 +75,7 @@ export const investigateNode = async (state : IncidentState) => {
     ])
 
     return {
-        status : "investigating" as const,
+        status : "investigating" as IncidentStatus,
         investigationResult : result as InvestigationResult,
     }
 }

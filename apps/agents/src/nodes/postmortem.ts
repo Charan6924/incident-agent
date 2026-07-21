@@ -64,7 +64,7 @@ export const postmortemNode = async (state: IncidentState) => {
   await slack.sendSummary(state.incident, postMortem);
 
   return {
-    status: "resolved" as const,
+    status: "resolved" as IncidentStatus,
     incident: {
       ...state.incident,
       updatedAt: new Date().toISOString(),

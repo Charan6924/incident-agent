@@ -133,7 +133,7 @@ export const remediateNode = async (state : IncidentState) => {
     ])
 
     return {
-        status : "remediated" as const,
+        status : "remediated" as IncidentStatus,
         remediationResult : result as RemediationResult,
     }
 }
