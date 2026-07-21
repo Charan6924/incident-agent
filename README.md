@@ -5,52 +5,62 @@ Multi-agent system that autonomously responds to production incidents — detect
 ## Architecture
 
 ```
-Event Sources (Prometheus / Grafana / Datadog / Custom)
+POST /api/incidents (or Kafka event)
         │
         ▼
-┌──────────────────┐     ┌──────────────────────────┐
-│   Upstash Kafka   │────▶│   LangGraph.js Workflow   │
-│   (Event Stream)  │     │                           │
-└──────────────────┘     │  ┌────────┐ ┌──────────┐  │
-                         │  │ Triage  │▶│Investigate│  │
-                         │  └───┬────┘ └────┬─────┘  │
-                         │      │           │         │
-                         │  ┌───▼────┐ ┌────▼─────┐  │
-                         │  │ Human  │ │ Remediate │  │
-                         │  │ Esc.   │ │           │  │
-                         │  └────────┘ └────┬─────┘  │
-                         │                  │         │
-                         │           ┌──────▼──────┐ │
-                         │           │ Post-Mortem  │ │
-                         │           └─────────────┘ │
-                         └──────────────────────────┘
-                                    │
-                         ┌──────────┼──────────┐
-                         ▼          ▼          ▼
-                   ┌────────┐ ┌────────┐ ┌──────────┐
-                   │ Slack  │ │Qdrant  │ │Dashboard │
-                   │ Alerts │ │Memory  │ │(Next.js) │
-                   └────────┘ └────────┘ └──────────┘
+┌────────────────────────────┐
+│        Inngest              │
+│  Durable execution pipeline │
+│                             │
+│  step.run("triage")         │
+│  step.run("investigate")    │
+│  step.waitForEvent(approve) │
+│  step.run("remediate")      │
+│  step.run("postmortem")     │
+└──────────┬─────────────────┘
+           │
+           ▼
+┌──────────────────────────┐
+│  LangGraph.js Workflow    │
+│  (agent state machine)    │
+│                           │
+│  ┌────────┐ ┌──────────┐ │
+│  │ Triage  │▶│Investigate│ │
+│  └───┬────┘ └────┬─────┘ │
+│      │           │       │
+│  ┌───▼────┐ ┌────▼─────┐ │
+│  │ Human  │ │ Remediate │ │
+│  │ Esc.   │ │           │ │
+│  └────────┘ └────┬─────┘ │
+│                  │       │
+│           ┌──────▼──────┐│
+│           │ Post-Mortem  ││
+│           └─────────────┘│
+└──────────────────────────┘
+         │
+         └──────────┬──────────┐
+                    ▼          ▼
+              ┌────────┐ ┌──────────┐
+              │ Slack  │ │Dashboard │
+              │ Alerts │ │(Next.js) │
+              └────────┘ └──────────┘
 ```
 
-### Agent Workflow
+### Pipeline
 
-Each incident moves through 5 nodes in a LangGraph state machine:
+Incidents flow through an **Inngest** durable execution pipeline with 5 stages,
+each wrapping the corresponding LangGraph node:
 
-| Node | What it does |
-|------|-------------|
-| **Triage** | Classifies severity (P0-P4), extracts service/error type, notifies Slack. Routes P0/P1 to human escalation, P2-P4 to autonomous investigation. |
-| **Investigate** | Uses tool-calling LLM to query Prometheus metrics and GitHub git history. Returns root cause with evidence. |
-| **Remediate** | Takes investigation results and applies fixes — rollback Vercel deployments, revert commits, create PRs, merge fixes. |
-| **Post-Mortem** | Generates a structured post-mortem report via LLM, stores it, and sends a Slack summary. |
-| **Human Escalation** | Sends Slack @here alert for P0/P1 incidents or when remediation needs approval. |
+| Stage | Engine | What it does |
+|-------|--------|-------------|
+| **Triage** | Inngest `step.run()` | Classifies severity (P0-P4), extracts service/error type. Routes to escalation if critical. |
+| **Investigate** | Inngest `step.run()` | Uses tool-calling LLM to query Prometheus metrics and GitHub git history. Returns root cause with evidence. |
+| **Human Approval** | Inngest `step.waitForEvent()` | Pauses pipeline — waits for an `incident/human-approved` event with a 10-minute timeout before proceeding to remediation. |
+| **Remediate** | Inngest `step.run()` | Takes investigation results and applies fixes — rollback Vercel deployments, revert commits, create PRs, merge fixes. |
+| **Post-Mortem** | Inngest `step.run()` | Generates a structured post-mortem report via LLM and sends a Slack summary. |
 
-### Conditional Routing
-
-- **Triage → Investigate** if severity is P2-P4 (autonomous)
-- **Triage → Human Escalation** if severity is P0-P1 (needs human)
-- **Remediate → Post-Mortem** if fix was auto-applied
-- **Remediate → Human Escalation** if fix needs approval
+If any `step.run()` fails, Inngest retries from that step — no re-execution of
+prior stages. See `apps/nextjs/inngest/processEvent.ts`.
 
 ## Project Structure
 
@@ -59,18 +69,24 @@ incident-agent/
 ├── apps/
 │   ├── agents/                 # LangGraph agent definitions
 │   │   └── src/
-│   │       ├── index.ts        # Compiled graph export
-│   │       ├── graph.ts        # StateGraph assembly + edges
+│   │       ├── index.ts        # Package exports
+│   │       ├── workflow.ts     # StateGraph assembly + edges
 │   │       ├── state.ts        # Annotation.Root state definition
 │   │       ├── llm.ts          # DeepSeek V4 Flash client
-│   │       ├── edges.ts        # Conditional routing functions
 │   │       └── nodes/
 │   │           ├── triage.ts
 │   │           ├── investigate.ts
 │   │           ├── remediate.ts
 │   │           ├── postmortem.ts
 │   │           └── human_escalation.ts
-│   └── nextjs/                 # Dashboard + API routes
+│   └── nextjs/                 # Dashboard + API + Inngest
+│       ├── app/
+│       │   └── api/
+│       │       ├── incidents/route.ts   # POST — sends Inngest event
+│       │       └── inngest/route.ts     # Inngest serve handler
+│       └── inngest/
+│           ├── client.ts           # Inngest client + event schemas
+│           └── processEvent.ts     # Durable pipeline definition
 ├── packages/
 │   ├── shared/                 # Types, schemas, constants
 │   │   └── src/types.ts        # Enums, interfaces, shared types
@@ -100,7 +116,7 @@ incident-agent/
 | **Event Bus** | Upstash Kafka |
 | **Cache** | Upstash Redis |
 | **Monitoring** | Prometheus + Grafana |
-| **Notificiations** | Slack webhooks |
+| **Notifications** | Slack webhooks |
 | **Infra** | Vercel (serverless deploy) |
 | **Package** | pnpm workspaces |
 
@@ -160,8 +176,24 @@ pnpm build
 
 ### Dev
 
+Terminal 1 — Next.js dev server:
+
 ```bash
 pnpm dev
+```
+
+Terminal 2 — Inngest dev server (dashboard at `localhost:8288`):
+
+```bash
+npx inngest-cli@latest dev -u http://localhost:3000/api/inngest
+```
+
+Send a test incident:
+
+```bash
+curl -X POST http://localhost:3000/api/incidents \
+  -H "Content-Type: application/json" \
+  -d '{"source":"test","title":"High latency","message":"p99 > 500ms","service":"api-gateway"}'
 ```
 
 ## State Shape
@@ -199,10 +231,8 @@ The LangGraph state machine uses `Annotation.Root` with these channels:
 - `sendSummary(incident, postMortem)` — Post resolution summary
 
 ### Prometheus (`createPrometheusClient`)
-- `query(promql)` — Run a PromQL query
+- `query(promql)` — Run a PromQL instant query
 - `queryRange(promql, start, end, step)` — Range query
-- `getAlertStatus()` — List current firing alerts
 
 ### Upstash Kafka (`createKafkaClient`)
-- `publishEvent(event)` — Publish an incident event
-- `subscribeToAlerts(handler)` — Subscribe to the alerts topic
+- `publish(event)` — Publish an incident event to the alerts topic
