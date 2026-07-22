@@ -1,4 +1,4 @@
-import type { Incident, PostMortem } from "@incident-agent/shared";
+import type { Incident, InvestigationResult, PostMortem } from "@incident-agent/shared";
 
 /**
  * Create a Slack webhook client for incident notifications.
@@ -36,5 +36,19 @@ export function createSlackClient(){
                 })
             })
         },
+        sendApprovalRequest : async(incident : Incident,
+            investigation : InvestigationResult,
+            approveUrl : string
+        ) => {
+            const evidenceText = investigation.evidence.map(e => `  • ${e}`).join("\n");
+            await fetch(webHookUrl,{
+                method: "POST",
+                headers : {"Content-Type" : "application/json"},
+                body: JSON.stringify({
+                    text: `@here *Approval Required: Incident #${incident.id}*\nService: ${incident.service} | Severity: ${incident.severity}\n\n*Root Cause:* ${investigation.rootCause}\n*Confidence:* ${(investigation.confidence * 100).toFixed(0)}%\n*Evidence:*\n${evidenceText}\n\nApprove: ${approveUrl}/approve\nReject: ${approveUrl}/reject`,
+                })
+            })
+        }
     }
 }
+
