@@ -1,7 +1,7 @@
 /** Remediate node: determines and applies a fix based on investigation results. */
 import { IncidentState } from "../state";
 import { llm } from "../llm"
-import { RemediationResult } from "@incident-agent/shared";
+import { RemediationResult, IncidentStatus } from "@incident-agent/shared";
 import { createGitHubClient, createVercelClient } from "@incident-agent/integrations";
 import { tool } from "@langchain/core/tools";
 

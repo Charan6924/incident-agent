@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const incidentId = parseInt(params.id);
+  const { id } = await params;
+  const incidentId = parseInt(id);
 
   await inngest.send({
     name: "incident/human-approved",

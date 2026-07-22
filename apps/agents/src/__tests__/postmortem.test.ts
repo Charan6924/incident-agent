@@ -22,7 +22,7 @@ const baseState = {
     title: "CPU spike",
     severity: Severity.P1,
     service: "api-gateway",
-    status: IncidentStatus.remediated,
+    status: "remediated" as IncidentStatus,
     events: [],
     timeline: [
       { type: "status_change", timestamp: "t1", agent: "triage", message: "triaged" },
@@ -32,7 +32,7 @@ const baseState = {
     updatedAt: "2025-01-01T00:30:00.000Z",
     resolvedAt: "2025-01-01T00:30:00.000Z",
   },
-  status: IncidentStatus.remediated,
+  status: "remediated" as IncidentStatus,
   investigationResult: {
     rootCause: "Connection pool exhausted",
     evidence: ["CPU at 95%"],

@@ -16,7 +16,7 @@ describe("Vercel client", () => {
     vi.stubGlobal("fetch", fetch);
 
     const client = createVercelClient();
-    const result = await client.listDeployments();
+    const result = await client.listDeployments() as { deployments: { uid: string }[] };
 
     const url = fetch.mock.calls[0][0] as URL;
     expect(url.href).toContain("/v1/deployments");
@@ -46,7 +46,7 @@ describe("Vercel client", () => {
     vi.stubGlobal("fetch", fetch);
 
     const client = createVercelClient();
-    const result = await client.rollbackDeployment("dpl_abc");
+    const result = await client.rollbackDeployment("dpl_abc") as { status: string };
 
     const url = fetch.mock.calls[0][0] as URL;
     const opts = fetch.mock.calls[0][1] as any;

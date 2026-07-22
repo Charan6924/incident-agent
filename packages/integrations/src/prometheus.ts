@@ -11,7 +11,7 @@ export function createPrometheusClient() {
       const res = await fetch(
         `${baseUrl}/api/v1/query?query=${encodeURIComponent(query)}`,
       );
-      const data = await res.json();
+      const data : any = await res.json();
       return data.data.result;
     },
 
@@ -23,7 +23,7 @@ export function createPrometheusClient() {
     ) => {
       const params = new URLSearchParams({ query, start, end, step });
       const res = await fetch(`${baseUrl}/api/v1/query_range?${params}`);
-      const data = await res.json();
+      const data : any = await res.json();
       return data.data.result;
     },
   };

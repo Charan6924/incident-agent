@@ -68,7 +68,7 @@ describe("GitHub client getCommitDiff", () => {
       ref: "abc123",
     });
     expect(result).toHaveLength(1);
-    expect(result[0].filename).toBe("src/index.ts");
+    expect(result![0].filename).toBe("src/index.ts");
   });
 
   it("returns null when owner is missing", async () => {

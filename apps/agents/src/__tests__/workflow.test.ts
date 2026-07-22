@@ -16,7 +16,7 @@ const fullState = {
     updatedAt: new Date().toISOString(),
   },
   status: "detected" as const,
-} as IncidentState;
+} as unknown as IncidentState;
 
 describe("routeTriage", () => {
   it("routes P0 to human escalation", () => {

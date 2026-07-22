@@ -1,7 +1,7 @@
 /** Post-mortem node: compiles a final report after remediation and stores it. */
 import { IncidentState } from "../state";
 import { llm } from "../llm"
-import { PostMortem } from "@incident-agent/shared";
+import { PostMortem, IncidentStatus } from "@incident-agent/shared";
 import { createSlackClient } from "@incident-agent/integrations";
 
 const classifier = llm.withStructuredOutput({

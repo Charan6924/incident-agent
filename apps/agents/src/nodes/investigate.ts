@@ -1,7 +1,7 @@
 /** Investigate node: gathers git history and metrics, then uses the LLM to determine root cause. */
 import { IncidentState } from "../state";
 import { llm } from "../llm"
-import { InvestigationResult } from "@incident-agent/shared";
+import { InvestigationResult, IncidentStatus } from "@incident-agent/shared";
 import { createGitHubClient, createPrometheusClient } from "@incident-agent/integrations";
 import { tool } from "@langchain/core/tools"
 /** Tool for querying Prometheus metrics during investigation. */
