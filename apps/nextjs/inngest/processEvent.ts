@@ -6,6 +6,7 @@ import {
   postmortemNode,
   type IncidentState,
 } from "@incident-agent/agents";
+import { createSlackClient } from "@incident-agent/integrations";
 import {
   Incident,
   IncidentEvent,
@@ -60,19 +61,41 @@ export const processEvent = inngest.createFunction(
     });
     state = { ...state, ...investigateResult };
 
-    await step.waitForEvent("approve-remediation", {
-      event: "incident/human-approved",
-      timeout: "10m",
-    });
+    if ([Severity.P0, Severity.P1].includes(state.incident.severity)) {
+      const slack = createSlackClient();
+      const baseUrl = process.env.APP_URL || "http://localhost:3000"
+      const approveUrl = `${baseUrl}/api/incidents/${state.incident.id}`;
+      await slack.sendApprovalRequest(state.incident, state.investigationResult!, approveUrl)
 
-    const remediateResult = await step.run("remediate", async () => {
-      return remediateNode(state);
-    });
-    state = { ...state, ...remediateResult };
+      const approval = await step.waitForEvent("approve-remediation", {
+        event: "incident/human-approved",
+        match: `incident-${state.incident.id}`,
+        timeout: "10m",
+      });
 
-    const postmortemResult = await step.run("postmortem", async () => {
-      return postmortemNode(state);
-    });
-    state = { ...state, ...postmortemResult };
+      if (approval?.data.decision === "approve"){
+        const remediateResult = await step.run("remediate", async () => {
+          return remediateNode(state);
+        });
+        state = { ...state, ...remediateResult };
+      } else {
+        state.remediationResult = { status: "skipped", action: "rejected" };
+      }
+
+      const postmortemResult = await step.run("postmortem", async () => {
+        return postmortemNode(state);
+      });
+      state = { ...state, ...postmortemResult };
+    } else {
+      const remediateResult = await step.run("remediate", async () => {
+        return remediateNode(state);
+      });
+      state = { ...state, ...remediateResult };
+
+      const postmortemResult = await step.run("postmortem", async () => {
+        return postmortemNode(state);
+      });
+      state = { ...state, ...postmortemResult };
+    }
   },
 );
