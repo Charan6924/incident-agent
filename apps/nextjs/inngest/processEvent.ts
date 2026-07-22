@@ -73,7 +73,7 @@ export const processEvent = inngest.createFunction(
         timeout: "10m",
       });
 
-      if (approval?.data.decision === "approve"){
+      if ((approval?.data as { decision?: string })?.decision === "approve"){
         const remediateResult = await step.run("remediate", async () => {
           return remediateNode(state);
         });
