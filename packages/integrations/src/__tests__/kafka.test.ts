@@ -7,7 +7,7 @@ const mockProduce = vi.fn();
 const mockProducer = { produce: mockProduce };
 
 vi.mock("@upstash/kafka", () => ({
-  Client: class {
+  Kafka: class {
     producer() {
       return mockProducer;
     }
