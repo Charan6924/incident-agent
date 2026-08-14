@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@incident-agent/shared": "workspace:*",
-    "@qdrant/js-client-rest": "^1.10.0"
+    "@qdrant/js-client-rest": "^1.19.0"
   },
   "devDependencies": {
     "typescript": "^5.5.0"
